@@ -13,6 +13,14 @@ function App() {
   const [resumeText, setResumeText] = useState("");
   const [presenceChecklist, setPresenceChecklist] = useState([]);
 
+  // for chat functionality
+
+  const [chatQuestion, setChatQuestion] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const [showChat, setShowChat] = useState(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (window.puter?.ai?.chat) {
@@ -98,6 +106,10 @@ function App() {
     setResumeText("");
     setPresenceChecklist([]);
     setIsLoading(false);
+    setChatQuestion("");
+    setChatMessages([]);
+    setChatLoading(false);
+    setShowChat(false);
   };
 
   const handleFileUpload = async (e) => {
@@ -129,6 +141,75 @@ function App() {
   };
 
   const numericScore = parseInt(analysis?.overallScore || "7", 10);
+
+  // chat functionality
+
+  const askAboutResume = async () => {
+    if (!chatQuestion.trim()) return;
+    if (!resumeText.trim()) {
+      alert("Please upload and analyze a resume first.");
+      return;
+    }
+
+    const newUserMessage = {
+      role: "user",
+      content: chatQuestion,
+    };
+
+    const updatedMessages = [...chatMessages, newUserMessage];
+    setChatMessages(updatedMessages);
+    setChatLoading(true);
+
+    try {
+      const response = await window.puter.ai.chat(
+        [
+          {
+            role: "system",
+            content: `You are a professional resume coach name Jarvis.
+Use only the resume below to answer questions.
+If something is missing from the resume, say so clearly.
+
+Resume:
+"""
+${resumeText}
+"""`,
+          },
+          ...updatedMessages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        ],
+        {
+          model: "gpt-4o",
+        },
+      );
+
+      const reply =
+        typeof response === "string"
+          ? response
+          : response?.message?.content || "No response received.";
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: reply,
+        },
+      ]);
+
+      setChatQuestion("");
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Error: ${err.message}`,
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-main-gradient p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -423,6 +504,8 @@ function App() {
                           {item.present ? "✅" : "❌"}
                         </span>
                       </div>
+
+                      // test
                     ))}
                   </div>
                 </div>
@@ -564,6 +647,113 @@ function App() {
           </div>
         )}
       </div>
+
+      {analysis && uploadedFile && (
+        <button
+          onClick={() => setShowChat((prev) => !prev)}
+          className="fixed top-6 right-6 z-50 rounded-full px-5 py-3 shadow-lg border border-fuchsia-500/30 bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 transition-all"
+        >
+          {showChat ? "Close Chat" : "Ask Jarvis, your personalized AI bud!"}
+        </button>
+      )}
+
+      {analysis && uploadedFile && showChat && (
+        <div className="fixed top-20 right-6 w-[360px] max-w-[calc(100vw-2rem)] z-50 rounded-2xl border border-slate-700 bg-slate-900/95 shadow-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-800/80">
+            <div>
+              <h4 className="text-white font-semibold">
+                Here for you, bud! Ask About Your Resume
+              </h4>
+              <p className="text-slate-400 text-xs">Jarvis powered by Puter</p>
+            </div>
+
+            <button
+              onClick={() => setShowChat(false)}
+              className="text-slate-400 hover:text-white text-sm"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <div className="h-72 overflow-y-auto space-y-3 rounded-xl bg-slate-950/60 border border-slate-800 p-3">
+              {chatMessages.length === 0 ? (
+                <div className="space-y-2">
+                  <p className="text-slate-400 text-sm">
+                    Bud, you can ask questions like:
+                  </p>
+
+                  {[
+                    "How can I improve my summary?",
+                    "Is my resume ATS-friendly?",
+                    "What skills are missing?",
+                    "How can I improve my experience section?",
+                  ].map((q, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setChatQuestion(q)}
+                      className="block w-full text-left rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-slate-300 text-sm hover:bg-slate-700"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                chatMessages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`rounded-xl px-3 py-2 text-sm ${
+                      msg.role === "user"
+                        ? "bg-cyan-500/15 border border-cyan-500/20 text-cyan-100"
+                        : "bg-slate-800 border border-slate-700 text-slate-200"
+                    }`}
+                  >
+                    <p className="mb-1 font-semibold">
+                      {msg.role === "user" ? "You" : "Jarvis"}
+                    </p>
+                    <p className="whitespace-pre-wrap leading-relaxed">
+                      {msg.content}
+                    </p>
+                  </div>
+                ))
+              )}
+
+              {chatLoading && (
+                <div className="rounded-xl px-3 py-2 text-sm bg-slate-800 border border-slate-700 text-slate-300">
+                  Your bud Jarvis is typing...
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={chatQuestion}
+                onChange={(e) => setChatQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !chatLoading) {
+                    askAboutResume();
+                  }
+                }}
+                placeholder="Ask something about your resume..."
+                className="w-full rounded-xl bg-slate-950/70 border border-slate-700 px-4 py-3 text-slate-200 placeholder:text-slate-500 outline-none"
+              />
+
+              <button
+                onClick={askAboutResume}
+                disabled={chatLoading || !chatQuestion.trim()}
+                className={`w-full rounded-xl px-4 py-3 font-medium text-white transition ${
+                  chatLoading || !chatQuestion.trim()
+                    ? "bg-slate-700 cursor-not-allowed opacity-50"
+                    : "bg-fuchsia-600 hover:bg-fuchsia-500"
+                }`}
+              >
+                Ask Jarvis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
