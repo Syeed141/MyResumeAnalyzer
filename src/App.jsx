@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import constants from "../constants"; 
-import{ buildPresenceChecklist } from "../constants";
+import constants, { METRIC_CONFIG, buildPresenceChecklist } from "../constants";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
@@ -34,12 +33,14 @@ function App() {
 
     const texts = await Promise.all(
       Array.from({ length: pdf.numPages }, (_, i) =>
-        pdf.getPage(i + 1).then((page) =>
-          page
-            .getTextContent()
-            .then((tc) => tc.items.map((item) => item.str).join(" "))
-        )
-      )
+        pdf
+          .getPage(i + 1)
+          .then((page) =>
+            page
+              .getTextContent()
+              .then((tc) => tc.items.map((item) => item.str).join(" ")),
+          ),
+      ),
     );
 
     return texts.join("\n").trim();
@@ -63,26 +64,27 @@ function App() {
   const analyzeResume = async (text) => {
     const prompt = constants.ANALYZE_RESUME_PROMPT.replace(
       "{{DOCUMENT_TEXT}}",
-      text
+      text,
     );
 
     const response = await window.puter.ai.chat(
       [
         {
           role: "system",
-          content: "You are an expert resume reviewer. Return only valid JSON.",
+          content:
+            "You are an expert resume reviewer. Respond only with valid JSON matching the requested structure.",
         },
         { role: "user", content: prompt },
       ],
       {
         model: "gpt-4o",
-      }
+      },
     );
 
     const result = parseJSONResponse(
       typeof response === "string"
         ? response
-        : response?.message?.content || ""
+        : response?.message?.content || "",
     );
 
     if (result.error) throw new Error(result.error);
@@ -125,6 +127,8 @@ function App() {
       setIsLoading(false);
     }
   };
+
+  const numericScore = parseInt(analysis?.overallScore || "7", 10);
 
   return (
     <div className="min-h-screen bg-main-gradient p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -234,33 +238,36 @@ function App() {
 
                 <div
                   className={`inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full ${
-                    parseInt(analysis.overallScore, 10) >= 8
+                    numericScore >= 8
                       ? "score-status-excellent"
-                      : parseInt(analysis.overallScore, 10) >= 6
-                      ? "score-status-good"
-                      : "score-status-improvement"
+                      : numericScore >= 6
+                        ? "score-status-good"
+                        : "score-status-improvement"
                   }`}
                 >
                   <span className="text-lg">
-                    {parseInt(analysis.overallScore, 10) >= 8
-                      ? "🌟"
-                      : parseInt(analysis.overallScore, 10) >= 6
-                      ? "⭐"
-                      : "📈"}
+                    {numericScore >= 8 ? "🌟" : numericScore >= 6 ? "⭐" : "📈"}
+                  </span>
+                  <span className="font-medium">
+                    {numericScore >= 8
+                      ? "Excellent"
+                      : numericScore >= 6
+                        ? "Good"
+                        : "Needs Improvement"}
                   </span>
                 </div>
 
                 <div className="progress-bar mt-4">
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${
-                      parseInt(analysis.overallScore, 10) >= 8
+                      numericScore >= 8
                         ? "progress-excellent"
-                        : parseInt(analysis.overallScore, 10) >= 6
-                        ? "progress-good"
-                        : "progress-improvement"
+                        : numericScore >= 6
+                          ? "progress-good"
+                          : "progress-improvement"
                     }`}
                     style={{
-                      width: `${(parseInt(analysis.overallScore || "7", 10) / 10) * 100}%`,
+                      width: `${(numericScore / 10) * 100}%`,
                     }}
                   ></div>
                 </div>
@@ -269,6 +276,290 @@ function App() {
                   Score based on content quality, formatting, and keyword usage
                 </p>
               </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="feature-card-green group">
+                <div className="bg-green-500/20 icon-container-lg mx-auto mb-3 group-hover:bg-green-400/30 transition-colors">
+                  <span className="text-green-300 text-xl">✓</span>
+                </div>
+
+                <h4 className="text-green-300 text-sm font-semibold uppercase tracking-wide mb-3">
+                  Top Strengths
+                </h4>
+
+                <div className="space-y-2 text-left">
+                  {(analysis.strengths || [])
+                    .slice(0, 3)
+                    .map((strength, index) => (
+                      <div key={index} className="list-item-green">
+                        <span className="text-green-400 text-sm mt-0.5">•</span>
+                        <span className="text-slate-200 font-medium text-sm leading-relaxed">
+                          {strength}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              <div className="feature-card-orange group">
+                <div className="bg-orange-500/20 icon-container-lg mx-auto mb-3 group-hover:bg-orange-400/30 transition-colors">
+                  <span className="text-orange-300 text-xl">⚡</span>
+                </div>
+
+                <h4 className="text-orange-300 text-sm font-semibold uppercase tracking-wide mb-3">
+                  Main Improvements
+                </h4>
+
+                <div className="space-y-2 text-left">
+                  {(analysis.improvements || [])
+                    .slice(0, 3)
+                    .map((improvement, index) => (
+                      <div key={index} className="list-item-orange">
+                        <span className="text-orange-400 text-sm mt-0.5">
+                          •
+                        </span>
+                        <span className="text-slate-200 font-medium text-sm leading-relaxed">
+                          {improvement}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="section-card group">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="icon-container bg-purple-500/20">
+                  <span className="text-purple-300 text-lg">📄</span>
+                </div>
+
+                <h4 className="text-xl font-bold text-white">
+                  Executive Summary
+                </h4>
+              </div>
+
+              <div className="summary-box">
+                <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
+                  {analysis.summary}
+                </p>
+              </div>
+            </div>
+
+            <div className="section-card group">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="icon-container bg-cyan-500/20">
+                  <span className="text-cyan-300 text-lg">📊</span>
+                </div>
+
+                <h4 className="text-xl font-bold text-white">
+                  Performance Metrics
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                {METRIC_CONFIG.map((cfg, i) => {
+                  const value =
+                    analysis.performanceMetrics?.[cfg.key] ?? cfg.defaultValue;
+
+                  return (
+                    <div key={i} className="group/item">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{cfg.icon}</span>
+                          <p className="text-slate-200 font-medium">
+                            {cfg.label}
+                          </p>
+                        </div>
+
+                        <span className="text-slate-300 font-bold">
+                          {value}/10
+                        </span>
+                      </div>
+
+                      <div className="progress-bar-small">
+                        <div
+                          className={`h-full bg-gradient-to-r ${cfg.colorClass} rounded-full transition-all duration-1000 ease-out group-hover/item:shadow-lg ${cfg.shadowClass}`}
+                          style={{ width: `${(value / 10) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="section-card group">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="icon-container bg-fuchsia-500/20">
+                  <span className="text-fuchsia-300 text-lg">🧠</span>
+                </div>
+
+                <h2 className="text-xl font-bold text-fuchsia-400">
+                  Resume Insights
+                </h2>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                    ATS Presence Checklist
+                  </h3>
+
+                  <div className="space-y-2">
+                    {presenceChecklist.map((item, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-center justify-between rounded-xl px-4 py-3 border ${
+                          item.present
+                            ? "bg-green-500/10 border-green-500/20"
+                            : "bg-red-500/10 border-red-500/20"
+                        }`}
+                      >
+                        <span className="text-slate-200 text-sm">
+                          {item.label}
+                        </span>
+                        <span className="text-lg">
+                          {item.present ? "✅" : "❌"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {!!analysis.keywords?.length && (
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                        Suggested Keywords
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {analysis.keywords.map((keyword, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/20 text-cyan-200 text-sm"
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!!analysis.actionItems?.length && (
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                        Action Items
+                      </h3>
+                      <div className="space-y-2">
+                        {analysis.actionItems.map((item, index) => (
+                          <div
+                            key={index}
+                            className="rounded-xl bg-slate-800/60 border border-slate-700 px-4 py-3 text-slate-200 text-sm"
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!!analysis.proTips?.length && (
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                        Pro Tips
+                      </h3>
+                      <div className="space-y-2">
+                        {analysis.proTips.map((tip, index) => (
+                          <div
+                            key={index}
+                            className="rounded-xl bg-violet-500/10 border border-violet-500/20 px-4 py-3 text-slate-200 text-sm"
+                          >
+                            {tip}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!!analysis.atsChecklist?.length && (
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                        ATS Checklist
+                      </h3>
+                      <div className="space-y-2">
+                        {analysis.atsChecklist.map((item, index) => (
+                          <div
+                            key={index}
+                            className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-slate-200 text-sm"
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {!!resumeText && (
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 mb-3">
+                    Resume Snapshot
+                  </h3>
+
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="rounded-2xl bg-slate-900/60 border border-slate-700 p-4">
+                      <p className="text-slate-400 text-xs uppercase tracking-wide mb-2">
+                        Word Count in the resume
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {resumeText.trim().split(/\s+/).filter(Boolean).length}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-900/60 border border-slate-700 p-4">
+                      <p className="text-slate-400 text-xs uppercase tracking-wide mb-2">
+                        Character Count
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {resumeText.length}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-900/60 border border-slate-700 p-4">
+                      <p className="text-slate-400 text-xs uppercase tracking-wide mb-2">
+                        Estimated Pages of Text
+                      </p>
+                      <p className="text-2xl font-bold text-white">
+                        {Math.max(1, Math.ceil(resumeText.length / 1800))}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl bg-slate-900/60 border border-slate-700 p-5">
+                    <p className="text-slate-400 text-xs uppercase tracking-wide mb-3">
+                      Quick Extract Check
+                    </p>
+
+                    <div className="space-y-3">
+                      {resumeText
+                        .split("\n")
+                        .map((line) => line.trim())
+                        .filter(Boolean)
+                        .slice(0, 6)
+                        .map((line, index) => (
+                          <div
+                            key={index}
+                            className="rounded-xl bg-slate-800/70 border border-slate-700 px-4 py-3 text-slate-200 text-sm"
+                          >
+                            {line}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
