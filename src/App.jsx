@@ -293,7 +293,7 @@ ${resumeText}
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 fade-up">
                   <button onClick={reset} className="btn-secondary">
                     🔄 New Analysis
                   </button>
@@ -301,7 +301,7 @@ ${resumeText}
               </div>
             </div>
 
-            <div className="score-card">
+            <div className="score-card fade-up">
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <span className="text-2xl">🏆</span>
@@ -338,7 +338,7 @@ ${resumeText}
                   </span>
                 </div>
 
-                <div className="progress-bar mt-4">
+                <div className="progress-bar mt-4 fade-up">
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${
                       numericScore >= 8
@@ -365,7 +365,7 @@ ${resumeText}
                   <span className="text-green-300 text-xl">✓</span>
                 </div>
 
-                <h4 className="text-green-300 text-sm font-semibold uppercase tracking-wide mb-3">
+                <h4 className="text-green-300 text-sm font-semibold uppercase tracking-wide mb-3 fade-up">
                   Top Strengths
                 </h4>
 
