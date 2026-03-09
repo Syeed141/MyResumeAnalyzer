@@ -1,4 +1,4 @@
-# AI Resume Analyzer
+# AI Based Resume Analyzer
 
 An intelligent **AI-powered resume analysis web application** that evaluates resumes, provides improvement suggestions, ATS insights, and allows users to chat with an AI resume coach.
 
