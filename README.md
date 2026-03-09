@@ -55,19 +55,209 @@ Example workflow:
 
 # ⭐ Key Features
 
-## 1. AI Resume Analysis
+# 🏆 Resume Score System
 
-The application sends extracted resume text to the AI model using a structured prompt.
+Resumes are scored from 1 to 10.
 
-The AI returns JSON containing:
+Score interpretation:
 
-- Overall Score
-- Strengths
-- Improvements
-- Summary
-- Keywords
-- Action Items
-- Pro Tips
-- ATS Checklist
-- Performance Metrics
+| Score | Meaning |
+|------|------|
+| 8 – 10 | Excellent |
+| 6 – 7 | Good |
+| 1 – 5 | Needs Improvement |
+
+The score is calculated based on:
+
+- Resume structure
+- Content quality
+- Keyword optimization
+- ATS compatibility
+- Impact statements
+
+---
+
+# ✅ ATS Presence Checklist
+
+The system checks whether your resume includes important sections:
+
+- Contact Information
+- Skills
+- Experience
+- Education
+- Projects
+- Certifications
+
+This improves ATS (Applicant Tracking System) compatibility.
+
+---
+
+# 📊 Resume Performance Metrics
+
+The system evaluates several metrics:
+
+- Content Clarity
+- ATS Optimization
+- Keyword Usage
+- Formatting Quality
+- Impact Statements
+
+Each metric is scored  0 to 10
+
+---
+
+# 🔍 Resume Insights
+
+AI provides additional insights including:
+
+- Suggested keywords
+- Actionable improvement items
+- Resume optimization tips
+- ATS checklist
+
+---
+
+# 📄 Resume Snapshot
+
+Quick statistics about your uploaded resume:
+
+- Word count
+- Character count
+- Estimated page count
+- Extracted text preview
+
+---
+
+# 🤖 AI Chat Assistant (Jarvis)
+
+Users can ask questions about their resume.
+
+Example questions:
+
+- How can I improve my summary?
+- Is my resume ATS friendly?
+- What skills am I missing?
+- How can I improve my experience section?
+
+Jarvis answers only based on the resume content to avoid hallucinations.
+
+---
+
+# 📁 Project Structure
+
+```
+AI-Resume-Analyzer
+│
+├── public
+│
+├── src
+│   ├── App.jsx
+│   ├── constants.js
+│   ├── main.jsx
+│   └── styles.css
+│
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+# ⚙️ Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/ai-resume-analyzer.git
+```
+
+Navigate to the project folder:
+
+```bash
+cd ai-resume-analyzer
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+---
+
+# 📦 Dependencies
+
+Install required packages:
+
+```bash
+npm install pdfjs-dist
+```
+
+---
+
+# 🤖 Puter AI Setup
+
+This project uses **Puter AI**.
+
+Include Puter in your HTML:
+
+```html
+<script src="https://js.puter.com/v2/"></script>
+```
+
+---
+
+
+# 🚀 Future Improvements
+
+Planned improvements:
+
+- Resume templates
+- Job description matching
+- ATS score breakdown
+- Resume rewriting suggestions
+- Resume export improvements
+- Multi-language support
+- Backend AI integration
+- Resume comparison tools
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+Steps:
+
+1. Fork the repository
+
+2. Create a new branch
+
+```bash
+git checkout -b feature-name
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push branch
+
+```bash
+git push origin feature-name
+```
+
+5. Open a Pull Request
+
+---
+
+
 
