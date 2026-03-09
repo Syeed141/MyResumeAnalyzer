@@ -1,16 +1,73 @@
-# React + Vite
+# AI Resume Analyzer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An intelligent **AI-powered resume analysis web application** that evaluates resumes, provides improvement suggestions, ATS insights, and allows users to chat with an AI resume coach.
 
-Currently, two official plugins are available:
+Upload your resume in **PDF format**, and the system will analyze it using **AI (GPT-4o via Puter AI)** to provide structured feedback and actionable improvements.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+# 🚀 Live Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- AI resume analysis
+- ATS compatibility checks
+- Resume scoring system
+- Keyword suggestions
+- Performance metrics
+- Resume insights
+- Resume statistics
+- Interactive AI chat assistant (Jarvis)
+- Instant PDF parsing
+- Clean modern UI
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# 🧠 Project Workflow
+
+Example workflow:
+
+1. Upload your resume (PDF)
+2. AI extracts text from the document
+3. AI analyzes resume quality
+4. Displays score, strengths, improvements
+5. Shows ATS insights and metrics
+6. Ask Jarvis questions about your resume
+
+---
+
+# 🛠 Tech Stack
+
+### Frontend
+- React
+- TailwindCSS
+- Vite
+
+### AI
+- Puter AI
+- GPT-4o Model
+
+### PDF Processing
+- pdfjs-dist
+
+### Other
+- Modern JavaScript (ES6+)
+
+---
+
+# ⭐ Key Features
+
+## 1. AI Resume Analysis
+
+The application sends extracted resume text to the AI model using a structured prompt.
+
+The AI returns JSON containing:
+
+- Overall Score
+- Strengths
+- Improvements
+- Summary
+- Keywords
+- Action Items
+- Pro Tips
+- ATS Checklist
+- Performance Metrics
+
