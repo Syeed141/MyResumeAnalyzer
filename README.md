@@ -21,6 +21,8 @@ Upload your resume in **PDF format**, and the system will analyze it using **AI 
 
 ---
 
+#Live Link : http://simple-resume-analyzer.surge.sh/
+
 # 🧠 Project Workflow
 
 Example workflow:
