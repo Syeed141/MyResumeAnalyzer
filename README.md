@@ -19,9 +19,11 @@ Upload your resume in **PDF format**, and the system will analyze it using **AI 
 - Instant PDF parsing
 - Clean modern UI
 
+Live Link : https://simple-resume-analyzer.surge.sh/
+
 ---
 
-#Live Link : http://simple-resume-analyzer.surge.sh/
+
 
 # 🧠 Project Workflow
 
